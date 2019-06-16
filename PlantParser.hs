@@ -1,4 +1,4 @@
-module PlantParser (stringToPlant, Plant(..)) where
+module PlantParser ({-stringToPlant, Plant(..)-}) where
 
 import Data.Char
 import Text.ParserCombinators.ReadP
