@@ -1,64 +1,44 @@
+module Main (main) where
+
 import Graphics.Gloss
+import Graphics.Gloss.Data.ViewPort
+import PlantParser
 
-data Plant = Leaf | Node Float Plant Plant
+teaGreen = makeColorI 196 241 190 255
+floralWhite = makeColorI 255 252 242 255
+apricot = makeColorI 255 201 181 255
+graniteGray = makeColorI 109 100 102 255
 
------------------
-
+window :: Display
 window = InWindow "\"PLANT\"" (500, 500) (400, 120)
 
+vp :: ViewPort 
+vp = ViewPort { viewPortTranslate = (0, -8)
+              , viewPortRotate = 0
+              , viewPortScale = 16 }
+
 main :: IO ()
-main = visualise $ drawPlant 35 . constructPlantFromString
+main = visualise $ applyViewPortToPicture vp . plantPicture . stringToPlant
+  where plantPicture = drawPlant 35
 
 visualise :: (String -> Picture) -> IO ()
 visualise f = do s <- getContents
-                 display window white (f s)
-
------------------
+                 display window floralWhite (f s)
 
 drawPlant :: Float -> Plant -> Picture
-drawPlant angle Leaf = color (dim green) (circle 0.1)
+drawPlant angle Leaf = color apricot (circleSolid 0.25)
 drawPlant angle (Node length p1 p2) = pictures [stem, plant1, plant2]
   where
-    stem = line' [(0, 0), (0, length)]
+    stem = color graniteGray . translate 0 (length / 2) $
+        rectangleSolid 0.2 length
     transform theta = translate 0 length . rotate theta . drawPlant theta
-    plant1 = transform newAngle    p1
-    plant2 = transform (-newAngle) p2
+    plant1 = id $ transform newAngle    p1
+    plant2 = id $ transform (-newAngle) p2
     newAngle = angle / 1.1
 
-line' :: Path -> Picture
-line' path = pictures $ line path : map f path
-  where f (a, b) = color red $ translate a b (circle 0.1)
+--line' :: Path -> Picture
+--line' path = pictures $ line path : map f path
+--  where f (a, b) = color red $ translate a b (circle 0.1)
 
-lerp :: Float -> Float -> Float -> Float
-lerp a b t = a * (1 - t) + b * t
-
-------------------------------------------------------------------------
-
-xlPlant :: Plant
-xlPlant = Node 6 largePlant (Node 4 mediumPlant (Node 3 Leaf Leaf))
-
-largePlant :: Plant
-largePlant = Node 5 smallPlant mediumPlant
-
-mediumPlant :: Plant
-mediumPlant = Node 4
-    (Node 3 Leaf (Node 2 smallPlant (Node 1 (Node 1 Leaf Leaf) Leaf)))
-    smallPlant
-
-smallPlant :: Plant
-smallPlant = Node 3
-    (Node 2 (Node 2 Leaf Leaf) Leaf)
-    (Node 1 Leaf Leaf)
-
-------------------------------------------------------------------------
-
-constructPlantFromString :: String -> Plant
-constructPlantFromString s = constructPlantFromLexemes (words s)
-
-data PlantData = Fork Float PlantData PlantData | String
-
-stringsToPlantData :: [String] -> PlantData
-stringsToPlantData [x]         = "l"
-stringsToPlantData [a, b, c]   = (a, b,   c)
-stringsToPlantData a:"l":xs    = (a, "l", stringsToPlantData xs
-stringsToPlantData 
+--lerp :: Float -> Float -> Float -> Float
+--lerp a b t = a * (1 - t) + b * t

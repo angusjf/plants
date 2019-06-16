@@ -1,15 +1,19 @@
+module PlantParser (stringToPlant, Plant(..)) where
+
 import Data.Char
 import Text.ParserCombinators.ReadP
 
-data Plant = Leaf | Node Int Plant Plant deriving (Show)
+data Plant = Leaf | Node Float Plant Plant deriving (Show)
+
+stringToPlant :: String -> Plant
+stringToPlant = fst . head . readP_to_S parsePlant 
 
 parsePlant :: ReadP Plant
 parsePlant = do
   plant <- parseLeaf +++ parseNode
-  eof
   return plant
 
-parseInt :: ReadP Int
+parseInt :: ReadP Float
 parseInt = pure read <*> (many1 $ satisfy isDigit)
 
 parseLeaf :: ReadP Plant
