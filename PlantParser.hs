@@ -19,14 +19,16 @@ parseInt = pure read <*> (many1 $ satisfy isDigit)
 parseLeaf :: ReadP Plant
 parseLeaf = do
   char 'l'
-  char ' '
   return Leaf
 
 parseNode :: ReadP Plant
 parseNode = do
+  char '('
   char 'f'
   length <- parseInt
   char ' '
   p1 <- parsePlant
+  char ' '
   p2 <- parsePlant
+  char ')'
   return $ Node length p1 p2

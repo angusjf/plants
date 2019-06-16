@@ -17,28 +17,46 @@ vp = ViewPort { viewPortTranslate = (0, -8)
               , viewPortRotate = 0
               , viewPortScale = 16 }
 
+----------main :: IO ()
+-----main = visualise $ applyViewPortToPicture vp . plantPicture . stringToPlant
+-----main = visualise (\t -> plantPicture . stringToPlant)
+-----  where plantPicture = dnnrawPlant 35
+-----
+-----visualise :: String -> Float -> Picture -> IO ()
+-----visualise f = do s <- getContents
+----------                 animate window floralWhite (f s)
+
 main :: IO ()
-main = visualise $ applyViewPortToPicture vp . plantPicture . stringToPlant
-  where plantPicture = drawPlant 35
+main = do inputString <- getContents
+          putStrLn $ show (stringToPlant inputString)
+          animate window floralWhite
+            (\time -> drawPlant 35 (stringToPlant inputString) time)
 
-visualise :: (String -> Picture) -> IO ()
-visualise f = do s <- getContents
-                 display window floralWhite (f s)
+drawPlant :: Float -> Plant -> Float -> Picture
 
-drawPlant :: Float -> Plant -> Picture
-drawPlant angle Leaf = color apricot (circleSolid 0.25)
-drawPlant angle (Node length p1 p2) = pictures [stem, plant1, plant2]
+drawPlant angle Leaf                        t = leaf
+
+drawPlant angle (Node length Leaf   plant ) t = pictures [stem length, p, join]
   where
-    stem = color graniteGray . translate 0 (length / 2) $
-        rectangleSolid 0.2 length
-    transform theta = translate 0 length . rotate theta . drawPlant theta
-    plant1 = id $ transform newAngle    p1
-    plant2 = id $ transform (-newAngle) p2
-    newAngle = angle / 1.1
+    p = translate 0 length $ rotate   newAngle  $ drawPlant newAngle plant t
+    newAngle = angle / (1 + (sin (t * 0.75) + 1) / 60)
 
---line' :: Path -> Picture
---line' path = pictures $ line path : map f path
---  where f (a, b) = color red $ translate a b (circle 0.1)
+drawPlant angle (Node length plant  Leaf  ) t = pictures [stem length, p, join]
+  where
+    p = translate 0 length $ rotate (-newAngle) $ drawPlant newAngle plant t
+    newAngle = angle / (1 + (sin (t * 0.75) + 1) / 60)
 
---lerp :: Float -> Float -> Float -> Float
---lerp a b t = a * (1 - t) + b * t
+drawPlant angle (Node length plant1 plant2) t = pictures [stem length, p1, p2, join]
+  where
+    p1 = translate 0 length $ rotate (-newAngle) $ drawPlant newAngle plant1 t
+    p2 = translate 0 length $ rotate   newAngle  $ drawPlant newAngle plant2 t
+    newAngle = angle / (1 + (sin (t * 0.75) + 1) / 60)
+
+leaf :: Picture
+leaf = color apricot $ circleSolid 0.25
+
+stem :: Float -> Picture
+stem l = color graniteGray $ translate 0 (l / 2) $ rectangleSolid 0.2 l
+
+join :: Picture
+join = color graniteGray $ circleSolid 0.1
