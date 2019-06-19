@@ -28,10 +28,11 @@ randomPlant g = case randomR (0 :: Int, 2) g of
                   (2, g') -> randomStem g'
 
 randomStem :: StdGen -> (Plant, StdGen)
-randomStem g = (Stem h a plant, g''')
-  where (h, g') = randomR (0.5, 4) g
-        (a, g'') = randomR ((-45) :: Float, 45) g'
-        (plant, g''') = randomPlant g''
+randomStem g = (Stem h (if leftOrRight then a else (-a)) plant, g'''')
+  where (h, g') = randomR (1, 4) g
+        (leftOrRight, g'') = random g'
+        (a, g''') = randomR (25 :: Float, 55) g''
+        (plant, g'''') = randomPlant g'''
 
 randomFork :: StdGen -> (Plant, StdGen)
 randomFork g = (Fork stem1 stem2, g'')
@@ -42,7 +43,7 @@ playWorld :: World -> IO ()
 playWorld = \w -> play window background 60 w drawWorld changeWorld stepWorld 
 
 simulateWorld :: World -> IO ()
-simulateWorld = \w -> simulate window background 60 w drawWorld (const stepWorld)
+simulateWorld = \w -> simulate window background 60 w drawWorld (const (const id))
 
 drawWorld :: World -> Picture
 drawWorld (a, b, c) = applyViewPortToPicture viewPort $ drawPlant a
@@ -51,15 +52,18 @@ changeWorld :: Event -> World -> World
 changeWorld (EventKey (SpecialKey KeySpace) Down _ _) (p, t, g) = (newPlant, t, newG)
   where (newPlant, newG) = randomStem g
 changeWorld _ world = world
+
 --------------------------------------------------------------------------------
+
 stepWorld :: Float -> World -> World
 
 stepWorld dt (Leaf, t, g) = (Leaf, t + dt, g)
 
-stepWorld dt (Stem h a Leaf, t, g) = (Stem nextH nextA nextLeaf, t + dt, g')
+stepWorld dt (Stem h a Leaf, t, g) = (Stem nextH nextA nextLeaf, t + dt, g'')
   where (v, g') = randomR (0 :: Float, 1) g
+        (offshootAngle, g'') = randomR (-45 :: Float, 45) g'
         nextLeaf = if shouldSplit v h then fork else Leaf
-        fork = Fork (Stem 0 15 Leaf) (Stem 0 (-15) Leaf)
+        fork = Fork (Stem 0 0 Leaf) (Stem 0 (-offshootAngle) Leaf)
         nextH = h + 0.004
         nextA = stepAngle t a
 
@@ -71,7 +75,9 @@ stepWorld dt (Fork p1 p2, t, g) = (Fork newP1 newP2, t + dt, g1')
   where (g1, g2) = split g
         (newP1, _, g1') = stepWorld dt (p1, t, g1)
         (newP2, _, g2') = stepWorld dt (p2, t, g2)
+
 --------------------------------------------------------------------------------
+
 shouldSplit :: Float -> Float -> Bool
-shouldSplit r length = (length / maxLength) ** (100 * (r + 0.1)) > 0.8
+shouldSplit r length = (length / maxLength) ** (100 * (r + 0.05)) > 0.8
   where maxLength = 4 :: Float
