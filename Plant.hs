@@ -1,6 +1,6 @@
 module Plant where
 
-data Plant = Stem Float Float Plant | Fork Plant Plant | Leaf
+data Plant = Stem Float Float Plant | Fork Plant Plant | Leaf deriving (Show)
 
 extendPlant :: Plant -> Plant
 extendPlant p = Stem 1 0 Leaf
