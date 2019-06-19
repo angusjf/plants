@@ -12,13 +12,16 @@ jet         = makeColorI 25 36 45 255
 mintyRose   = makeColorI 212 206 201 255
 azureMist   = makeColorI 94 154 163 255
 
-background  = azureMist
-leafColor   = mintyRose
+background  = floralWhite
+leafColor   = apricot
 stemColor   = jet
 
 drawPlant :: Plant -> Picture
+drawPlant = drawPlant'
+{-
 drawPlant p = pictures [ t , drawPlant' p ]
   where t = translate (-5) 5 $ scale 0.01 0.01 $ text $ show $ getPlantSize p
+  -}
 
 drawPlant' :: Plant -> Picture
 drawPlant' Leaf = leaf
