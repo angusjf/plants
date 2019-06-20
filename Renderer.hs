@@ -14,7 +14,7 @@ azureMist   = makeColorI 94 154 163 255
 
 background  = floralWhite
 leafColor   = apricot
-stemColor   = jet
+stemColor   = graniteGray
 
 drawPlant :: Plant -> Picture
 drawPlant = drawPlant'
@@ -25,7 +25,7 @@ drawPlant p = pictures [ t , drawPlant' p ]
 
 drawPlant' :: Plant -> Picture
 drawPlant' Leaf = leaf
-drawPlant' (Stem h a nextPlant) = rotate a $ pictures
+drawPlant' (Stem h a hmax v nextPlant) = rotate a $ pictures
     [stem h, join, translate 0 h $ drawPlant' nextPlant]
 drawPlant' (Fork leftPlant rightPlant) = pictures
     [drawPlant' leftPlant, join, drawPlant' rightPlant]
@@ -35,12 +35,11 @@ leaf = color leafColor $ circleSolid 0.25
 
 stem :: Float -> Picture
 stem l = color stemColor $ translate 0 (l / 2) $ rectangleSolid 0.2 l
---stem l = color stemColor $ line [(0, 0), (0, l)]
 
 join :: Picture
 join = color stemColor $ circleSolid 0.1
 
 getPlantSize :: Plant -> Int
 getPlantSize Leaf = 1
-getPlantSize (Stem _ _ p) = 1 + getPlantSize p
+getPlantSize (Stem _ _ _ _ p) = 1 + getPlantSize p
 getPlantSize (Fork p1 p2) = 1 + getPlantSize p1 + getPlantSize p2
