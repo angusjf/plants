@@ -24,7 +24,7 @@ randomStem :: StdGen -> (Plant, StdGen)
 randomStem g = (Stem 0 a hmax v Leaf, g'''')
   where (hmax, g') = randomR (1, 4) g
         (leftOrRight, g'') = random g'
-        (b, g''') = randomR (15 :: Float, 65) g''
+        (b, g''') = randomR (10 :: Float, 35) g''
         (v, g'''') = randomR (0.02, 0.04) g'''
         a = (if leftOrRight then b else (-b))
 
@@ -58,9 +58,9 @@ sway p t = p
 mutate :: Plant -> StdGen -> (Plant, StdGen)
 mutate Leaf g = (Leaf, g)
 mutate (Stem h a maxH v Leaf) g = if h < maxH then (Stem h a maxH v Leaf, g)
-    else let (isStem, g') = random g
+    else let (r, g') = randomR (0, 1 :: Double) g
              (next, g'')  = randomStem g'
-         in if isStem then (Stem h a maxH v next, g'')
+         in if r < 0.7 then (Stem h a maxH v next, g'')
             else (Stem h a maxH v (Fork (Stem 0 0 maxH v Leaf) next), g'')
 mutate (Stem h a maxH v p) g = (Stem h a maxH v newPlant, g')
   where (newPlant, g') = mutate p g
