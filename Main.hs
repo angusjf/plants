@@ -10,10 +10,10 @@ import Renderer
 type World = (Plant, Float, StdGen)
 
 window :: Display
-window = FullScreen--InWindow "\"PLANT\"" (500, 500) (400, 120)
+window = InWindow "plant" (800, 600) (240, 100)
 
 viewPort :: ViewPort 
-viewPort = ViewPort { viewPortTranslate = (0, -12),
+viewPort = ViewPort { viewPortTranslate = (0, -14),
                       viewPortRotate = 0, viewPortScale = 18 }
 
 main :: IO ()

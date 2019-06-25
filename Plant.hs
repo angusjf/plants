@@ -68,3 +68,7 @@ mutate (Fork p1 p2) g = (Fork newP1 newP2, g1')
   where (g1, g2) = split g
         (newP1, g1') = mutate p1 g1
         (newP2, g2') = mutate p2 g2
+
+
+withSpeed :: Float -> Plant -> Plant
+withSpeed v (Stem h a hmax _ Leaf) = Stem h a hmax v Leaf

@@ -34,7 +34,8 @@ leaf :: Picture
 leaf = color leafColor $ circleSolid 0.25
 
 stem :: Float -> Picture
-stem l = color stemColor $ translate 0 (l / 2) $ rectangleSolid 0.2 l
+stem l = color stemColor $ rectangleUpperSolid 0.2 l
+--em l = color stemColor $ translate 0 (l / 2) $ rectangleSolid 0.2 l
 
 join :: Picture
 join = color stemColor $ circleSolid 0.1
